@@ -18,7 +18,7 @@
     "lint:css": "stylelint --color \"client/**/*.css\"",
     "lint:js": "eslint . --report-unused-disable-directives --color",
     "start-old": "node index start",
-    "start": "NODE_ENV=production npm run build && npm start-old"
+    "start": "NODE_ENV=production npm run build && npm start-old",
     "test": "run-p --aggregate-output --continue-on-error lint:* test:{client,server}",
     "test:browser": "webpack-dev-server --config=webpack.config-browser.js",
     "test:client": "nyc --nycrc-path=test/.nycrc-mocha-webpack mocha-webpack --colors --opts=test/mocha-webpack.opts",
