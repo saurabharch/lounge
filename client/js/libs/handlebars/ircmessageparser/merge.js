@@ -3,30 +3,14 @@
 const anyIntersection = require("./anyIntersection");
 const fill = require("./fill");
 
-let Object_assign = Object.assign;
-
-if (typeof Object_assign !== "function") {
-	Object_assign = function(target) {
-		Array.prototype.slice.call(arguments, 1).forEach(function(obj) {
-			Object.keys(obj).forEach(function(key) {
-				target[key] = obj[key];
-			});
-		});
-		return target;
-	};
-}
-
 // Merge text part information within a styling fragment
 function assign(textPart, fragment) {
 	const fragStart = fragment.start;
 	const start = Math.max(fragment.start, textPart.start);
 	const end = Math.min(fragment.end, textPart.end);
+	const text = fragment.text.slice(start - fragStart, end - fragStart);
 
-	return Object_assign({}, fragment, {
-		start: start,
-		end: end,
-		text: fragment.text.slice(start - fragStart, end - fragStart)
-	});
+	return Object.assign({}, fragment, {start, end, text});
 }
 
 // Merge the style fragments withing the text parts, taking into account
@@ -48,10 +32,10 @@ function merge(textParts, styleFragments) {
 		.sort((a, b) => a.start - b.start);
 
 	// Distribute the style fragments within the text parts
-	return allParts.map(textPart => {
+	return allParts.map((textPart) => {
 		textPart.fragments = styleFragments
-			.filter(fragment => anyIntersection(textPart, fragment))
-			.map(fragment => assign(textPart, fragment));
+			.filter((fragment) => anyIntersection(textPart, fragment))
+			.map((fragment) => assign(textPart, fragment));
 
 		return textPart;
 	});

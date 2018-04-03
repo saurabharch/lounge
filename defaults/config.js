@@ -8,13 +8,15 @@ module.exports = {
 	// Set to 'false' to enable users.
 	//
 	// @type     boolean
-	// @default  true
+	// @default  false
 	//
-	public: true,
+	public: false,
 
 	//
 	// IP address or hostname for the web server to listen on.
 	// Setting this to undefined will listen on all interfaces.
+	//
+	// For UNIX domain sockets, use unix:/absolute/path/to/file.sock.
 	//
 	// @type     string
 	// @default  undefined
@@ -49,11 +51,12 @@ module.exports = {
 
 	//
 	// Set the default theme.
+	// Find out how to add new themes at https://thelounge.github.io/docs/plugins/themes.html
 	//
 	// @type     string
-	// @default  "themes/example.css"
+	// @default  "example"
 	//
-	theme: "themes/example.css",
+	theme: "example",
 
 	//
 	// Prefetch URLs
@@ -67,15 +70,32 @@ module.exports = {
 	prefetch: false,
 
 	//
+	// Store and proxy prefetched images and thumbnails.
+	// This improves security and privacy by not exposing client IP address,
+	// and always loading images from The Lounge instance and making all assets secure,
+	// which in result fixes mixed content warnings.
+	//
+	// If storage is enabled, The Lounge will fetch and store images and thumbnails
+	// in the `${THELOUNGE_HOME}/storage` folder.
+	//
+	// Images are deleted when they are no longer referenced by any message (controlled by maxHistory),
+	// and the folder is cleaned up on every The Lounge restart.
+	//
+	// @type     boolean
+	// @default  false
+	//
+	prefetchStorage: false,
+
+	//
 	// Prefetch URLs Image Preview size limit
 	//
 	// If prefetch is enabled, The Lounge will only display content under the maximum size.
-	// Default value is 512 (in kB)
+	// Specified value is in kilobytes. Default value is 2048 kilobytes.
 	//
 	// @type     int
-	// @default  512
+	// @default  2048
 	//
-	prefetchMaxImageSize: 512,
+	prefetchMaxImageSize: 2048,
 
 	//
 	// Display network
@@ -129,6 +149,19 @@ module.exports = {
 	webirc: null,
 
 	//
+	// Message logging
+	// Logging is also controlled per user individually (logs variable)
+	// Leave the array empty to disable all logging globally
+	//
+	// text: Text file per network/channel in user folder
+	// sqlite: Messages are stored in SQLite, this allows them to be reloaded on server restart
+	//
+	// @type     array
+	// @default  ["sqlite", "text"]
+	//
+	messageStorage: ["sqlite", "text"],
+
+	//
 	// Log settings
 	//
 	// Logging has to be enabled per user. If enabled, logs will be stored in
@@ -152,7 +185,7 @@ module.exports = {
 		// @type     string
 		// @default  "UTC+00:00"
 		//
-		timezone: "UTC+00:00"
+		timezone: "UTC+00:00",
 	},
 
 	//
@@ -214,20 +247,34 @@ module.exports = {
 		tls: true,
 
 		//
+		// Enable certificate verification
+		//
+		// If true, the server certificate is verified against
+		// the list of supplied CAs by your node.js installation.
+		//
+		// @type     boolean
+		// @default  true
+		//
+		rejectUnauthorized: true,
+
+		//
 		// Nick
 		//
-		// @type     string
-		// @default  "lounge-user"
+		// Percent sign (%) will be replaced into a random number from 0 to 9.
+		// For example, Guest%%% will become Guest123 on page load.
 		//
-		nick: "lounge-user",
+		// @type     string
+		// @default  "thelounge%%"
+		//
+		nick: "thelounge%%",
 
 		//
 		// Username
 		//
 		// @type     string
-		// @default  "lounge-user"
+		// @default  "thelounge"
 		//
-		username: "lounge-user",
+		username: "thelounge",
 
 		//
 		// Real Name
@@ -244,7 +291,7 @@ module.exports = {
 		// @type     string
 		// @default  "#thelounge"
 		//
-		join: "#thelounge"
+		join: "#thelounge",
 	},
 
 	//
@@ -296,8 +343,16 @@ module.exports = {
 		// @example  "sslcert/bundle.pem"
 		// @default  ""
 		//
-		ca: ""
+		ca: "",
 	},
+
+	//
+	// Default quit and part message if none is provided.
+	//
+	// @type     string
+	// @default  "The Lounge - https://thelounge.chat"
+	//
+	leaveMessage: "The Lounge - https://thelounge.chat",
 
 	//
 	// Run The Lounge with identd support.
@@ -320,7 +375,7 @@ module.exports = {
 		// @type     int
 		// @default  113
 		//
-		port: 113
+		port: 113,
 	},
 
 	//
@@ -337,6 +392,30 @@ module.exports = {
 	// LDAP authentication settings (only available if public=false)
 	// @type    object
 	// @default {}
+	//
+	// The authentication process works as follows:
+	//
+	//   1. Lounge connects to the LDAP server with its system credentials
+	//   2. It performs a LDAP search query to find the full DN associated to the
+	//      user requesting to log in.
+	//   3. Lounge tries to connect a second time, but this time using the user's
+	//      DN and password. Auth is validated iff this connection is successful.
+	//
+	// The search query takes a couple of parameters in `searchDN`:
+	//   - a base DN `searchDN/base`. Only children nodes of this DN will be likely
+	//     to be returned;
+	//   - a search scope `searchDN/scope` (see LDAP documentation);
+	//   - the query itself, build as (&(<primaryKey>=<username>) <filter>)
+	//     where <username> is the user name provided in the log in request,
+	//     <primaryKey> is provided by the config and <fitler> is a filtering complement
+	//     also given in the config, to filter for instance only for nodes of type
+	//     inetOrgPerson, or whatever LDAP search allows.
+	//
+	// Alternatively, you can specify the `bindDN` parameter. This will make the lounge
+	// ignore searchDN options and assume that the user DN is always:
+	//     <bindDN>,<primaryKey>=<username>
+	// where <username> is the user name provided in the log in request, and <bindDN>
+	// and <primaryKey> are provided by the config.
 	//
 	ldap: {
 		//
@@ -355,11 +434,25 @@ module.exports = {
 		url: "ldaps://example.com",
 
 		//
-		// LDAP base dn
+		// LDAP connection tls options (only used if scheme is ldaps://)
+		//
+		// @type     object (see nodejs' tls.connect() options)
+		// @default {}
+		//
+		// Example:
+		//   You can use this option in order to force the use of IPv6:
+		//   {
+		//     host: 'my::ip::v6',
+		//     servername: 'example.com'
+		//   }
+		tlsOptions: {},
+
+		//
+		// LDAP base dn, alternative to searchDN
 		//
 		// @type     string
 		//
-		baseDN: "ou=accounts,dc=example,dc=com",
+		// baseDN: "ou=accounts,dc=example,dc=com",
 
 		//
 		// LDAP primary key
@@ -367,7 +460,58 @@ module.exports = {
 		// @type     string
 		// @default  "uid"
 		//
-		primaryKey: "uid"
+		primaryKey: "uid",
+
+		//
+		// LDAP search dn settings. This defines the procedure by which the
+		// lounge first look for user DN before authenticating her.
+		// Ignored if baseDN is specified
+		//
+		// @type     object
+		//
+		searchDN: {
+
+			//
+			// LDAP searching bind DN
+			// This bind DN is used to query the server for the DN of the user.
+			// This is supposed to be a system user that has access in read only to
+			// the DNs of the people that are allowed to log in.
+			//
+			// @type     string
+			//
+			rootDN: "cn=thelounge,ou=system-users,dc=example,dc=com",
+
+			//
+			// Password of the lounge LDAP system user
+			//
+			// @type     string
+			//
+			rootPassword: "1234",
+
+			//
+			// LDAP filter
+			//
+			// @type     string
+			// @default  "uid"
+			//
+			filter: "(objectClass=person)(memberOf=ou=accounts,dc=example,dc=com)",
+
+			//
+			// LDAP search base (search only within this node)
+			//
+			// @type     string
+			//
+			base: "dc=example,dc=com",
+
+			//
+			// LDAP search scope
+			//
+			// @type     string
+			// @default  "sub"
+			//
+			scope: "sub",
+
+		},
 	},
 
 	// Extra debugging

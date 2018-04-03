@@ -1,4 +1,4 @@
-<span role="button" class="user {{colorClass from}}" data-name="{{from}}">{{mode}}{{from}}</span>
+{{> ../user_name from}}
 <i class="hostmask">({{hostmask}})</i>
 has quit
 {{#if text}}

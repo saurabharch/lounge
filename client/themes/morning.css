@@ -3,7 +3,7 @@ Morning theme for The Lounge.
 Has a bit more eye-friendly color scheme.
 
 Installation instructions can be found here
-https://thelounge.github.io/docs/server/configuration.html#theme
+https://thelounge.chat/docs/server/configuration.html#theme
 
 Author: Riku Rouvila
 GitHub: https://github.com/rikukissa
@@ -22,35 +22,35 @@ body {
 	color: #ccc;
 }
 
+.logo {
+	display: none;
+}
+
+.logo-inverted {
+	display: inline-block;
+}
+
 #main,
-#chat .sidebar,
+#chat .userlist,
 #windows .chan,
 #windows .window {
 	background: #333c4a;
 }
 
-#windows .header .topic,
-#windows #form .input,
-.messages .msg,
-.sidebar {
-	font-family: inherit;
-	font-size: 13px;
-}
-
-#chat .count {
+#chat .userlist .count {
 	background-color: #2e3642;
 }
 
-#chat .search {
+#chat .userlist .search {
 	color: #ccc;
 	padding: 15px 16px;
 }
 
 /* Borders */
-#chat .from,
+#chat .content,
 #windows .header,
-#chat .user-mode:before,
-#chat .sidebar {
+#chat .user-mode::before,
+#chat .userlist {
 	border-color: #2a323d;
 }
 
@@ -59,13 +59,13 @@ body {
 	color: #fefefe;
 }
 
+#chat .userlist .user.active {
+	background-color: #242a33;
+}
+
 /* Nicknames */
 #chat .user {
 	color: #b0bacf;
-}
-
-#chat .user:hover {
-	color: #fefefe;
 }
 
 #chat.colored-nicks .user.color-1 { color: #f7adf7; }
@@ -103,10 +103,6 @@ body {
 
 #chat a {
 	color: #428bca;
-}
-
-#chat button:hover {
-	opacity: 1;
 }
 
 /* Increase contrast of some IRC colors */
@@ -151,19 +147,19 @@ body {
 }
 
 /* Notification dot on the top right corner of the menu icon */
-#viewport .lt:after {
+#viewport .lt::after {
 	border-color: #333c4a;
 }
 
-#chat .unread-marker-text:before {
+#chat .unread-marker-text::before {
 	background-color: #333c4a;
 }
 
-#chat .date-marker:before {
+#chat .date-marker::before {
 	border-color: #97ea70;
 }
 
-#chat .date-marker-text:before {
+#chat .date-marker-text::before {
 	background-color: #333c4a;
 	color: #97ea70;
 }
@@ -211,45 +207,46 @@ body {
 	color: #ccc;
 }
 
-/* Embeds */
-#chat .toggle-content,
-#chat .toggle-button {
+code,
+.irc-monospace {
 	background: #242a33;
 	color: #f3f3f3;
 }
 
-#chat .toggle-content img {
-	float: left;
-	margin-right: .5em;
+kbd {
+	color: #eee;
+	text-shadow: 0 -1px 0 #000;
+	border-color: #000;
+	background-color: #333;
+	background-image: linear-gradient(rgba(0, 0, 0, 0.25), transparent);
+	box-shadow: 0 2px 0 #000, inset 0 1px 1px #777, inset 0 -1px 3px #222;
+}
+
+/* Embeds */
+#chat .toggle-content {
+	background: #242a33;
+	color: #f3f3f3;
 }
 
 #chat .toggle-content .body {
 	color: #99a2b4;
 }
 
-.btn-reconnect {
-	background: #e74c3c;
-	color: #fff;
-	border: 0;
-	border-radius: 0;
-	margin: 0;
-}
-
 /* Form elements */
 
 #chat-container ::-moz-placeholder {
 	color: #99a2b4;
-	opacity: .5;
+	opacity: 0.5;
 }
 
 #chat-container ::-webkit-input-placeholder {
 	color: #99a2b4;
-	opacity: .5;
+	opacity: 0.5;
 }
 
 #chat-container :-ms-input-placeholder {
 	color: #99a2b4;
-	opacity: .5;
+	opacity: 0.5;
 }
 
 /* End form elements */

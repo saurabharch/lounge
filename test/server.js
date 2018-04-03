@@ -5,24 +5,41 @@ const expect = require("chai").expect;
 const request = require("request");
 const io = require("socket.io-client");
 
-describe("Server", () => {
-	const server = require("../src/server");
-	server();
+describe("Server", function() {
+	// Travis is having issues with slow workers and thus tests timeout
+	this.timeout(process.env.CI ? 25000 : 5000);
+
+	let server;
+	let originalLogInfo;
+
+	before(function() {
+		originalLogInfo = log.info;
+
+		log.info = () => {};
+
+		server = require("../src/server")();
+	});
+
+	after(function(done) {
+		server.close(done);
+
+		log.info = originalLogInfo;
+	});
 
 	const webURL = `http://${Helper.config.host}:${Helper.config.port}/`;
 
 	describe("Express", () => {
-		it("should run a web server on " + webURL, done => {
+		it("should run a web server on " + webURL, (done) => {
 			request(webURL, (error, response, body) => {
 				expect(error).to.be.null;
 				expect(body).to.include("<title>The Lounge</title>");
-				expect(body).to.include("https://thelounge.github.io/");
+				expect(body).to.include("js/bundle.js");
 
 				done();
 			});
 		});
 
-		it("should serve static content correctly", done => {
+		it("should serve static content correctly", (done) => {
 			request(webURL + "manifest.json", (error, response, body) => {
 				expect(error).to.be.null;
 
@@ -34,8 +51,15 @@ describe("Server", () => {
 		});
 	});
 
-	describe("WebSockets", () => {
+	describe("WebSockets", function() {
+		this.slow(300);
+
 		let client;
+
+		before((done) => {
+			Helper.config.public = true;
+			done();
+		});
 
 		beforeEach(() => {
 			client = io(webURL, {
@@ -44,8 +68,8 @@ describe("Server", () => {
 				reconnection: false,
 				timeout: 1000,
 				transports: [
-					"websocket"
-				]
+					"websocket",
+				],
 			});
 
 			// Server emits events faster than the test can bind them
@@ -58,11 +82,11 @@ describe("Server", () => {
 			client.close();
 		});
 
-		it("should emit authorized message", done => {
+		it("should emit authorized message", (done) => {
 			client.on("authorized", done);
 		});
 
-		it("should create network", done => {
+		it("should create network", (done) => {
 			client.on("init", () => {
 				client.emit("conn", {
 					username: "test-user",
@@ -75,7 +99,7 @@ describe("Server", () => {
 				});
 			});
 
-			client.on("network", data => {
+			client.on("network", (data) => {
 				expect(data.networks).to.be.an("array");
 				expect(data.networks).to.have.lengthOf(1);
 				expect(data.networks[0].realname).to.equal("The Lounge Test");
@@ -86,12 +110,16 @@ describe("Server", () => {
 			});
 		});
 
-		it("should emit init message", done => {
-			client.on("init", data => {
+		it("should emit init message", (done) => {
+			client.on("init", (data) => {
 				expect(data.active).to.equal(-1);
 				expect(data.networks).to.be.an("array");
 				expect(data.networks).to.be.empty;
 				expect(data.token).to.be.null;
+				expect(data.pushSubscription).to.be.undefined;
+
+				// Private key defined in vapid.json is "01020304050607080910111213141516" for this public key.
+				expect(data.applicationServerKey).to.equal("BM0eTDpvDnH7ewlHuXWcPTE1NjlJ06XWIS1cQeBTZmsg4EDx5sOpY7kdX1pniTo8RakL3UdfFuIbC8_zog_BWIM");
 
 				done();
 			});

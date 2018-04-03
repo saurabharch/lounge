@@ -3,35 +3,17 @@
  */
 
 body {
-	margin: 0;
-}
-
-.signed-out #main {
-	left: 5px;
-}
-
-#sidebar {
-	bottom: 52px;
+	padding: 4px;
+	padding-left: 0;
 }
 
 #footer {
+	margin-left: 4px;
 	border-radius: 2px;
-	bottom: 4px;
-	left: 5px;
-	width: 210px;
+	width: 216px;
 }
 
-#main {
-	bottom: 4px;
-	right: 5px;
-	top: 4px;
-}
-
-#chat .unhandled .from {
-	color: #ddd;
-}
-
-#windows .window:before {
+#windows .window::before {
 	background: #f4f4f4;
 	background-image: linear-gradient(#f4f4f4, #ececec);
 	border-bottom: 1px solid #d7d7d7;
@@ -40,31 +22,29 @@ body {
 	height: 10px;
 	position: relative;
 	z-index: 10;
+	flex-shrink: 0;
 }
 
 #windows .window {
 	border-radius: 2px;
 }
 
-.btn-reconnect {
-	background: #e74c3c;
-	color: #fff;
-	border: 0;
-	border-radius: 0;
-	margin: 0;
-}
-
 @media (max-width: 768px) {
-	#sidebar {
-		left: -220px;
+	body {
+		padding: 0;
 	}
 
 	#footer {
-		left: -215px;
-		width: 215px;
+		margin-left: 0;
+		border-radius: 0;
+		width: inherit;
 	}
 
-	#main {
-		left: 5px;
+	#windows .window::before {
+		display: none;
+	}
+
+	#windows .window {
+		border-radius: 0;
 	}
 }

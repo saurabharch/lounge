@@ -2,7 +2,7 @@ import jQuery from "jquery";
 
 (function($) {
 	$.fn.unsticky = function() {
-		return this.trigger("unstick.sticky").unbind(".sticky");
+		return this.trigger("unstick.sticky").off(".sticky");
 	};
 
 	$.fn.sticky = function() {
@@ -37,7 +37,7 @@ import jQuery from "jquery";
 				lastStick = Date.now();
 				this.scrollTop = this.scrollHeight;
 			})
-			.on("msg.sticky", keepToBottom)
+			.on("keepToBottom.sticky", keepToBottom)
 			.scrollBottom();
 
 		return self;

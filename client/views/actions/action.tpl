@@ -1,2 +1,6 @@
-<span role="button" class="user {{colorClass from}}" data-name="{{from}}">{{mode}}{{from}}</span>
-<span class="action-text">{{{parse text}}}</span>
+{{> ../user_name from}}
+<span class="text">{{{parse text users}}}</span>
+
+{{#each previews}}
+	<div class="preview" data-url="{{link}}"></div>
+{{/each}}

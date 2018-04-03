@@ -1,21 +1,21 @@
 "use strict";
 
-var _ = require("lodash");
-var Msg = require("../../models/msg");
-var Chan = require("../../models/chan");
-var Helper = require("../../helper");
+const _ = require("lodash");
+const Msg = require("../../models/msg");
+const Chan = require("../../models/chan");
+const Helper = require("../../helper");
 
 module.exports = function(irc, network) {
-	var client = this;
+	const client = this;
 
 	network.channels[0].pushMessage(client, new Msg({
-		text: "Network created, connecting to " + network.host + ":" + network.port + "..."
+		text: "Network created, connecting to " + network.host + ":" + network.port + "...",
 	}), true);
 
 	irc.on("registered", function() {
 		if (network.irc.network.cap.enabled.length > 0) {
 			network.channels[0].pushMessage(client, new Msg({
-				text: "Enabled capabilities: " + network.irc.network.cap.enabled.join(", ")
+				text: "Enabled capabilities: " + network.irc.network.cap.enabled.join(", "),
 			}), true);
 		}
 
@@ -27,21 +27,21 @@ module.exports = function(irc, network) {
 			irc.raw("AWAY", client.awayMessage);
 		}
 
-		var delay = 1000;
-		var commands = network.commands;
-		if (Array.isArray(commands)) {
-			commands.forEach(cmd => {
+		let delay = 1000;
+
+		if (Array.isArray(network.commands)) {
+			network.commands.forEach((cmd) => {
 				setTimeout(function() {
 					client.input({
 						target: network.channels[0].id,
-						text: cmd
+						text: cmd,
 					});
 				}, delay);
 				delay += 1000;
 			});
 		}
 
-		network.channels.forEach(chan => {
+		network.channels.forEach((chan) => {
 			if (chan.type !== Chan.Type.CHANNEL) {
 				return;
 			}
@@ -60,27 +60,48 @@ module.exports = function(irc, network) {
 		});
 
 		network.channels[0].pushMessage(client, new Msg({
-			text: "Connected to the network."
+			text: "Connected to the network.",
 		}), true);
+
+		sendStatus();
 	});
 
 	irc.on("close", function() {
 		network.channels[0].pushMessage(client, new Msg({
-			text: "Disconnected from the network, and will not reconnect. Use /connect to reconnect again."
+			text: "Disconnected from the network, and will not reconnect. Use /connect to reconnect again.",
 		}), true);
 	});
 
 	let identSocketId;
 
 	irc.on("raw socket connected", function(socket) {
-		identSocketId = client.manager.identHandler.addSocket(socket, client.name || network.username);
+		let ident = client.name || network.username;
+
+		if (Helper.config.useHexIp) {
+			ident = Helper.ip2hex(network.ip);
+		}
+
+		identSocketId = client.manager.identHandler.addSocket(socket, ident);
 	});
 
-	irc.on("socket close", function() {
+	irc.on("socket close", function(error) {
 		if (identSocketId > 0) {
 			client.manager.identHandler.removeSocket(identSocketId);
 			identSocketId = 0;
 		}
+
+		network.channels.forEach((chan) => {
+			chan.state = Chan.State.PARTED;
+		});
+
+		if (error) {
+			network.channels[0].pushMessage(client, new Msg({
+				type: Msg.Type.ERROR,
+				text: `Connection closed unexpectedly: ${error}`,
+			}), true);
+		}
+
+		sendStatus();
 	});
 
 	if (Helper.config.debug.ircFramework) {
@@ -95,7 +116,7 @@ module.exports = function(irc, network) {
 				from: message.from_server ? "«" : "»",
 				self: !message.from_server,
 				type: "raw",
-				text: message.line
+				text: message.line,
 			}), true);
 		});
 	}
@@ -103,19 +124,19 @@ module.exports = function(irc, network) {
 	irc.on("socket error", function(err) {
 		network.channels[0].pushMessage(client, new Msg({
 			type: Msg.Type.ERROR,
-			text: "Socket error: " + err
+			text: "Socket error: " + err,
 		}), true);
 	});
 
 	irc.on("reconnecting", function(data) {
 		network.channels[0].pushMessage(client, new Msg({
-			text: "Disconnected from the network. Reconnecting in " + Math.round(data.wait / 1000) + " seconds… (Attempt " + data.attempt + " of " + data.max_retries + ")"
+			text: "Disconnected from the network. Reconnecting in " + Math.round(data.wait / 1000) + " seconds… (Attempt " + data.attempt + " of " + data.max_retries + ")",
 		}), true);
 	});
 
 	irc.on("ping timeout", function() {
 		network.channels[0].pushMessage(client, new Msg({
-			text: "Ping timeout, disconnecting…"
+			text: "Ping timeout, disconnecting…",
 		}), true);
 	});
 
@@ -126,7 +147,7 @@ module.exports = function(irc, network) {
 
 		network.prefixLookup = {};
 
-		data.options.PREFIX.forEach(mode => {
+		data.options.PREFIX.forEach((mode) => {
 			network.prefixLookup[mode.mode] = mode.symbol;
 		});
 
@@ -135,7 +156,14 @@ module.exports = function(irc, network) {
 
 		client.emit("network_changed", {
 			network: network.id,
-			serverOptions: network.serverOptions
+			serverOptions: network.serverOptions,
 		});
 	});
+
+	function sendStatus() {
+		const status = network.getNetworkStatus();
+		status.network = network.id;
+
+		client.emit("network:status", status);
+	}
 };

@@ -1,26 +1,28 @@
 "use strict";
 
-var User = require("../../models/user");
-
 module.exports = function(irc, network) {
-	var client = this;
+	const client = this;
+
 	irc.on("userlist", function(data) {
-		var chan = network.getChannel(data.channel);
+		const chan = network.getChannel(data.channel);
+
 		if (typeof chan === "undefined") {
 			return;
 		}
 
-		chan.users = data.users.map(user => {
-			return new User({
-				nick: user.nick,
-				modes: user.modes,
-			}, network.prefixLookup);
+		const newUsers = new Map();
+
+		data.users.forEach((user) => {
+			const newUser = chan.getUser(user.nick);
+			newUser.setModes(user.modes, network.prefixLookup);
+
+			newUsers.set(user.nick.toLowerCase(), newUser);
 		});
 
-		chan.sortUsers(irc);
+		chan.users = newUsers;
 
 		client.emit("users", {
-			chan: chan.id
+			chan: chan.id,
 		});
 	});
 };
