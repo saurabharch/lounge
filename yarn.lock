@@ -7689,9 +7689,10 @@ yargs@~3.10.0:
     decamelize "^1.0.0"
     window-size "0.1.0"
 
-yarn@1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.5.1.tgz#e8680360e832ac89521eb80dad3a7bc27a40bab4"
+yarn@1.19.0:
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/yarn/-/yarn-1.19.0.tgz#e4fb83762849a9545f95eb077fd0905f7ddae2f0"
+  integrity sha512-QLiMoj+ZHo2kT17x1t7erO6gzR+9xSa5z7Lmei1qYM1Sj37wiIFv67kQcH+nkshsO0f03ImXClfkEKUgnsMreQ==
 
 yeast@0.1.2:
   version "0.1.2"
