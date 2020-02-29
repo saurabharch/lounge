@@ -46,7 +46,7 @@
     "commander": "2.15.1",
     "express": "4.16.3",
     "fs-extra": "5.0.0",
-    "irc-framework": "2.11.0",
+    "irc-framework": "4.7.0",
     "lodash": "4.17.5",
     "mime-types": "2.1.18",
     "moment": "2.22.0",
