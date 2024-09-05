@@ -42,15 +42,15 @@
   "dependencies": {
     "bcryptjs": "2.4.3",
     "chalk": "2.3.2",
-    "cheerio": "0.22.0",
+    "cheerio": "1.0.0",
     "commander": "2.15.1",
     "express": "4.16.3",
     "fs-extra": "5.0.0",
-    "irc-framework": "2.11.0",
+    "irc-framework": "4.11.0",
     "lodash": "4.17.5",
     "mime-types": "2.1.18",
     "moment": "2.22.0",
-    "package-json": "4.0.1",
+    "package-json": "9.0.0",
     "primer-tooltips": "1.5.3",
     "read": "1.0.7",
     "request": "2.85.0",
@@ -62,7 +62,7 @@
     "ua-parser-js": "0.7.17",
     "urijs": "1.19.1",
     "uuid": "3.2.1",
-    "web-push": "3.3.0",
+    "web-push": "3.4.4",
     "yarn": "1.5.1"
   },
   "devDependencies": {
